@@ -2,8 +2,10 @@ var rs = require('http/v3/rs');
 var uuid = require('utils/v3/uuid');
 var escape = require('utils/v3/escape');
 var streams = require('io/v3/streams');
+var repositoryManager = require('repository/v3/manager');
 var configurations = require('core/v3/configurations');
 
+var PATH_REGISTRY_PUBLIC = '/registry/public';
 var DIRIGIBLE_THEME_DEFAULT = 'DIRIGIBLE_THEME_DEFAULT';
 var DEFAULT_THEME = 'default';
 var NAME_PARAM = 'name';
@@ -31,14 +33,25 @@ rs.service()
 				response.setHeader('ETag', cacheValue);
 				response.setStatus(response.NOT_MODIFIED);
 			} else {
-				var inputStream = streams.getResourceAsByteArrayInputStream(THEMES_PATH + cookieValue + '/' + path);
+				var repositoryPath = PATH_REGISTRY_PUBLIC + THEMES_PATH + cookieValue + '/' + path;
+				var resource = repositoryManager.getResource(repositoryPath);
+				var content = null;
+
+				if (resource.exists()) {
+					var resourceContent = resource.getContent();
+					var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
+					content = repositoryInputStream.readText();
+				} else {
+					var inputStream = streams.getResourceAsByteArrayInputStream(THEMES_PATH + cookieValue + '/' + path);
+					content = inputStream.readText();
+				}
 
 				etag = uuid.random();
 				configurations.set(THEME_CACHE + '_' + path, etag);
 
 				response.setHeader('ETag', etag);
 				response.setHeader('Cache-Control', 'public, must-revalidate, max-age=0');
-				response.println(inputStream.readText());
+				response.println(content);
 			}
 		})
 .execute();
