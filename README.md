@@ -9,7 +9,7 @@ IDE Themes Plugin for the [Eclipse Dirigible](https://github.com/eclipse/dirigib
 
 Build the [Eclipse Dirigible](https://github.com/eclipse/dirigible), deploy on e.g. Tomcat Web Container and go to location:
 
-> http://localhost:8080/services/v3/js/themes/resources.js
+> http://localhost:8080/services/v3/js/theme/resources.js
 
 ## License
 
