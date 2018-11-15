@@ -71,7 +71,7 @@ function getContent(request, response, path) {
 			var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
 			content = repositoryInputStream.readText();
 		} else {
-			var inputStream = streams.getResourceAsByteArrayInputStream(themeModule + '/' + path);
+			var inputStream = streams.getResourceAsByteArrayInputStream('/' + themeModule + '/' + path);
 			content = inputStream.readText();
 		}
 	}
