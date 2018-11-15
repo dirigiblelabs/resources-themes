@@ -4,6 +4,7 @@ var escape = require('utils/v3/escape');
 var streams = require('io/v3/streams');
 var repositoryManager = require('repository/v3/manager');
 var configurations = require('core/v3/configurations');
+var themesManager = require('theme/extensions/themes');
 
 var PATH_REGISTRY_PUBLIC = '/registry/public';
 var DIRIGIBLE_THEME_DEFAULT = 'DIRIGIBLE_THEME_DEFAULT';
@@ -50,18 +51,29 @@ rs.service()
 .execute();
 
 function getContent(request, response, path) {
-	var cookieValue = getCurrentTheme(request, response);
-	var repositoryPath = PATH_REGISTRY_PUBLIC + THEMES_PATH + cookieValue + '/' + path;
-	var resource = repositoryManager.getResource(repositoryPath);
 	var content = null;
+	var cookieValue = getCurrentTheme(request, response);
+	var themes = themesManager.getThemes();
 
-	if (resource.exists()) {
-		var resourceContent = resource.getContent();
-		var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
-		content = repositoryInputStream.readText();
-	} else {
-		var inputStream = streams.getResourceAsByteArrayInputStream(THEMES_PATH + cookieValue + '/' + path);
-		content = inputStream.readText();
+	var themeModule = null;
+	for (var i = 0; i < themes.length; i ++) {
+		if (themes[i].id === cookieValue) {
+			themeModule = themes[i].module;
+			break;
+		}
+	}
+
+	if (themeModule !== null && themeModule !== '') {
+		var resource = repositoryManager.getResource(PATH_REGISTRY_PUBLIC + '/' + themeModule + '/' + path);
+	
+		if (resource.exists()) {
+			var resourceContent = resource.getContent();
+			var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
+			content = repositoryInputStream.readText();
+		} else {
+			var inputStream = streams.getResourceAsByteArrayInputStream(THEMES_PATH + cookieValue + '/' + path);
+			content = inputStream.readText();
+		}
 	}
 	return content;
 }
