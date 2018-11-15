@@ -69,7 +69,7 @@ function getContent(request, response, path) {
 		if (resource.exists()) {
 			var resourceContent = resource.getContent();
 			var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
-			content = repositoryInputStream.readText();
+			content = repositoryInputStream.readBytes();
 		} else {
 			var inputStream = streams.getResourceAsByteArrayInputStream('/' + themeModule + '/' + path);
 			content = inputStream.readBytes();
