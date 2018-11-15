@@ -41,7 +41,7 @@ rs.service()
 					response.setStatus(response.OK);
 					response.setHeader('ETag', etag);
 					response.setHeader('Cache-Control', 'public, must-revalidate, max-age=0');
-					response.println(content);
+					response.write(content);
 				} else {
 					response.setStatus(response.NOT_FOUND);
 					response.println('');
@@ -72,7 +72,7 @@ function getContent(request, response, path) {
 			content = repositoryInputStream.readText();
 		} else {
 			var inputStream = streams.getResourceAsByteArrayInputStream('/' + themeModule + '/' + path);
-			content = inputStream.readText();
+			content = inputStream.readBytes();
 		}
 	}
 	return content;
