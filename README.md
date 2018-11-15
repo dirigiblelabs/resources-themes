@@ -1,11 +1,11 @@
-# IDE Themes Plugin for Eclipse Dirigible
+# Themes Plugin for Eclipse Dirigible
 
 [![Eclipse License](http://img.shields.io/badge/license-Eclipse-brightgreen.svg)](LICENSE)
-[![GitHub contributors](https://img.shields.io/github/contributors/dirigiblelabs/ide-themes.svg)](https://github.com/dirigiblelabs/ide-themes/graphs/contributors)
+[![GitHub contributors](https://img.shields.io/github/contributors/dirigiblelabs/resources-themes.svg)](https://github.com/dirigiblelabs/resources-themes/graphs/contributors)
 
 ## Overview
 
-IDE Themes Plugin for the [Eclipse Dirigible](https://github.com/eclipse/dirigible) WebIDE v3.x and above.
+Themes Plugin for the [Eclipse Dirigible](https://github.com/eclipse/dirigible) WebIDE v3.x and above.
 
 Build the [Eclipse Dirigible](https://github.com/eclipse/dirigible), deploy on e.g. Tomcat Web Container and go to location:
 
