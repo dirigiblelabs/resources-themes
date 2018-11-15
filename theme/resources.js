@@ -23,38 +23,48 @@ rs.service()
 	.resource('{path}')
 		.get(function(ctx, request, response) {
 			var path = ctx.pathParameters.path;
-			var cookieValue = getCurrentTheme(request, response);
 
-			var cacheValue = configurations.get(THEME_CACHE + '_' + path);
-			var etag = null;
+			var cacheETag = configurations.get(THEME_CACHE + '_' + path);
 			var ifNoneMatchHeader = request.getHeader('If-None-Match');
 
-			if (ifNoneMatchHeader !== null && cacheValue !== null && ifNoneMatchHeader === cacheValue) {
-				response.setHeader('ETag', cacheValue);
+			if (ifNoneMatchHeader !== null && cacheETag !== null && ifNoneMatchHeader === cacheETag) {
+				response.setHeader('ETag', cacheETag);
 				response.setStatus(response.NOT_MODIFIED);
 			} else {
-				var repositoryPath = PATH_REGISTRY_PUBLIC + THEMES_PATH + cookieValue + '/' + path;
-				var resource = repositoryManager.getResource(repositoryPath);
-				var content = null;
+				var content = getContent(request, response, path);
 
-				if (resource.exists()) {
-					var resourceContent = resource.getContent();
-					var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
-					content = repositoryInputStream.readText();
+				if (content !== null && content !== '') {
+					var etag = uuid.random();
+					configurations.set(THEME_CACHE + '_' + path, etag);
+
+					response.setStatus(response.OK);
+					response.setHeader('ETag', etag);
+					response.setHeader('Cache-Control', 'public, must-revalidate, max-age=0');
+					response.println(content);
 				} else {
-					var inputStream = streams.getResourceAsByteArrayInputStream(THEMES_PATH + cookieValue + '/' + path);
-					content = inputStream.readText();
+					response.setStatus(response.NOT_FOUND);
+					response.println('');
 				}
-
-				etag = uuid.random();
-				configurations.set(THEME_CACHE + '_' + path, etag);
-
-				response.setHeader('ETag', etag);
-				response.setHeader('Cache-Control', 'public, must-revalidate, max-age=0');
-				response.println(content);
 			}
 		})
 .execute();
+
+function getContent(request, response, path) {
+	var cookieValue = getCurrentTheme(request, response);
+	var repositoryPath = PATH_REGISTRY_PUBLIC + THEMES_PATH + cookieValue + '/' + path;
+	var resource = repositoryManager.getResource(repositoryPath);
+	var content = null;
+
+	if (resource.exists()) {
+		var resourceContent = resource.getContent();
+		var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
+		content = repositoryInputStream.readText();
+	} else {
+		var inputStream = streams.getResourceAsByteArrayInputStream(THEMES_PATH + cookieValue + '/' + path);
+		content = inputStream.readText();
+	}
+	return content;
+}
 
 function getCurrentTheme(request, response) {
 	var env = configurations.get(DIRIGIBLE_THEME_DEFAULT);
