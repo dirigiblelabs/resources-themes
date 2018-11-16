@@ -21,6 +21,12 @@ rs.service()
 			response.print(theme);
 			response.setContentType('text/plain');
 		})
+	.resource('themes')
+		.get(function(ctx, request, response) {
+			var themes = themesManager.getThemes();
+			response.print(themes);
+			response.setContentType('application/json');
+		})
 	.resource('{path}')
 		.get(function(ctx, request, response) {
 			var path = ctx.pathParameters.path;
