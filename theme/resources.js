@@ -108,7 +108,7 @@ function getCurrentTheme(request, response) {
 
 function getThemeCookie(request) {
 	var cookies = request.getCookies();
-	for (var i = 0; i < cookies.length; i ++) {
+	for (var i = 0; cookies !== null && i < cookies.length; i ++) {
 		if (cookies[i].name === THEME_COOKIE) {
 			return cookies[i].value;
 		}
