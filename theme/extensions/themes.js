@@ -19,6 +19,20 @@ exports.getThemes = function() {
 	    var theme = themeExtension.getTheme();
 	    themes.push(theme);
 	}
-	
+
+	themes = themes.sort(function(a, b) {
+		if (a.order !== undefined && b.order !== undefined) {
+			return a.order - b.order;
+		} else if (a.order !== undefined) {
+			return -1;
+		} else if (b.order !== undefined) {
+			return 1;
+		} else if (a.name > b.name) {
+			return 1;
+		} else if (a.name < b.name) {
+			return -1;
+		}
+		return 0;
+	});
 	return themes;
 };
