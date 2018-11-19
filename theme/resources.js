@@ -1,18 +1,18 @@
 var rs = require('http/v3/rs');
-var uuid = require('utils/v3/uuid');
 var escape = require('utils/v3/escape');
 var streams = require('io/v3/streams');
 var repositoryManager = require('repository/v3/manager');
 var configurations = require('core/v3/configurations');
 var themesManager = require('theme/extensions/themes');
+var cacheUtils = require('theme/utils/cache');
+
+var THEME_CACHE = cacheUtils.getCache();
 
 var PATH_REGISTRY_PUBLIC = '/registry/public';
 var DIRIGIBLE_THEME_DEFAULT = 'DIRIGIBLE_THEME_DEFAULT';
 var DEFAULT_THEME = 'default';
 var NAME_PARAM = 'name';
 var THEME_COOKIE = 'dirigible-theme';
-var THEMES_PATH = '/resources/themes/';
-var THEME_CACHE = 'THEME_CACHE';
 var DEFAULT_THEME_MODULE_NAME = 'theme-';
 
 rs.service()
@@ -32,21 +32,17 @@ rs.service()
 		.get(function(ctx, request, response) {
 			var path = ctx.pathParameters.path;
 
-			var cacheETag = configurations.get(THEME_CACHE + '_' + path);
-			var ifNoneMatchHeader = request.getHeader('If-None-Match');
-
-			if (ifNoneMatchHeader !== null && cacheETag !== null && ifNoneMatchHeader === cacheETag) {
-				response.setHeader('ETag', cacheETag);
+			if (isCached(request, path)) {
+				response.setHeader('ETag', getTag(request));
 				response.setStatus(response.NOT_MODIFIED);
 			} else {
 				var content = getContent(request, response, path);
 
 				if (content !== null && content !== '') {
-					var etag = uuid.random();
-					configurations.set(THEME_CACHE + '_' + path, etag);
+					var tag = cacheResource(path);
 
 					response.setStatus(response.OK);
-					response.setHeader('ETag', etag);
+					response.setHeader('ETag', tag);
 					response.setHeader('Cache-Control', 'public, must-revalidate, max-age=0');
 					response.write(content);
 				} else {
@@ -94,7 +90,7 @@ function getCurrentTheme(request, response) {
 
 	if (themeName !== null && themeName !==  '') {
 		setThemeCookie(response, themeName);
-		resetThemeCache();
+		THEME_CACHE.clear();
 		cookieValue = themeName;
 	} else {
 		var themeCookie = getThemeCookie(request);
@@ -125,12 +121,18 @@ function setThemeCookie(response, theme) {
 	});
 }
 
-function resetThemeCache() {
-	var configurationKeys = JSON.parse(configurations.getKeys());
-	for (var i = 0; i < configurationKeys.length; i ++) {
-		var key = configurationKeys[i];
-		if (key.startsWith(THEME_CACHE)) {
-			configurations.set(key, '');
-		}
-	}
+function cacheResource(path) {
+	var tag = THEME_CACHE.generateTag();
+	THEME_CACHE.setTag(path, tag);
+	return tag;
+}
+
+function isCached(request, path) {
+	var tag = getTag(request);
+	var cachedTag = THEME_CACHE.getTag(path);
+	return tag === null || cachedTag === null ? false : tag === cachedTag;
+}
+
+function getTag(request) {
+	return request.getHeader('If-None-Match');
 }
