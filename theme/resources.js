@@ -13,6 +13,7 @@ var NAME_PARAM = 'name';
 var THEME_COOKIE = 'dirigible-theme';
 var THEMES_PATH = '/resources/themes/';
 var THEME_CACHE = 'THEME_CACHE';
+var DEFAULT_THEME_MODULE_NAME = 'theme-';
 
 rs.service()
 	.resource('')
@@ -68,18 +69,18 @@ function getContent(request, response, path) {
 			break;
 		}
 	}
+	if (themes.length === 0) {
+		themeModule = DEFAULT_THEME_MODULE_NAME + cookieValue;
+	}
 
-	if (themeModule !== null && themeModule !== '') {
-		var resource = repositoryManager.getResource(PATH_REGISTRY_PUBLIC + '/' + themeModule + '/' + path);
-	
-		if (resource.exists()) {
-			var resourceContent = resource.getContent();
-			var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
-			content = repositoryInputStream.readBytes();
-		} else {
-			var inputStream = streams.getResourceAsByteArrayInputStream('/' + themeModule + '/' + path);
-			content = inputStream.readBytes();
-		}
+	var resource = repositoryManager.getResource(PATH_REGISTRY_PUBLIC + '/' + themeModule + '/' + path);
+	if (resource.exists()) {
+		var resourceContent = resource.getContent();
+		var repositoryInputStream = streams.createByteArrayInputStream(JSON.parse(resourceContent));
+		content = repositoryInputStream.readBytes();
+	} else {
+		var inputStream = streams.getResourceAsByteArrayInputStream('/' + themeModule + '/' + path);
+		content = inputStream.readBytes();
 	}
 	return content;
 }

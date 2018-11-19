@@ -12,15 +12,22 @@ var extensions = require('core/v3/extensions');
 
 exports.getThemes = function() {
 	var themes = [];
-	var themeExtensions = extensions.getExtensions('ide-themes');
-	console.error('themeExtensions: ' + JSON.stringify(themeExtensions));
-	for (var i = 0; themeExtensions  !== null && i < themeExtensions .length; i++) {
-	    var themeExtension = require(themeExtensions[i]);
-	    var theme = themeExtension.getTheme();
-	    themes.push(theme);
+	try {
+		var themeExtensions = extensions.getExtensions('ide-themes');
+		for (var i = 0; themeExtensions  !== null && i < themeExtensions .length; i++) {
+			var themeExtension = require(themeExtensions[i]);
+			var theme = themeExtension.getTheme();
+			themes.push(theme);
+		}
+		themes = sort(themes);
+	} catch (e) {
+		console.error('Error while loading theme modules: ' + e);
 	}
+	return themes;
+};
 
-	themes = themes.sort(function(a, b) {
+function sort(themes) {
+	return themes.sort(function(a, b) {
 		if (a.order !== undefined && b.order !== undefined) {
 			return a.order - b.order;
 		} else if (a.order !== undefined) {
@@ -34,5 +41,4 @@ exports.getThemes = function() {
 		}
 		return 0;
 	});
-	return themes;
-};
+}
