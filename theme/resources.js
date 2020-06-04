@@ -36,7 +36,7 @@ rs.service()
 					themeFound = true;
 				}
 			})
-			theme = themeFound ? theme : "default";
+			theme = themeFound ? theme : DEFAULT_THEME;
 			response.print(theme);
 			response.setContentType('text/plain');
 		})
