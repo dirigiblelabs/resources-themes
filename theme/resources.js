@@ -29,6 +29,14 @@ rs.service()
 	.resource('')
 		.get(function(ctx, request, response) {
 			var theme = getCurrentTheme(request, response);
+			var themes = themesManager.getThemes();
+			var themeFound = false;
+			themes.forEach(function(e) {
+				if (e.id === theme) {
+					themeFound = true;
+				}
+			})
+			theme = themeFound ? theme : "default";
 			response.print(theme);
 			response.setContentType('text/plain');
 		})
@@ -95,7 +103,7 @@ function getContent(request, response, path) {
 
 function getCurrentTheme(request, response) {
 	var env = configurations.get(DIRIGIBLE_THEME_DEFAULT);
-	var cookieValue = env === null ? DEFAULT_THEME : env;
+	var cookieValue = env ? env : DEFAULT_THEME;
 	var themeName = request.getParameter(NAME_PARAM);
 	themeName = escape.escapeHtml4(themeName);
 	themeName = escape.escapeJavascript(themeName);
