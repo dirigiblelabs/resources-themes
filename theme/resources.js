@@ -29,14 +29,6 @@ rs.service()
 	.resource('')
 		.get(function(ctx, request, response) {
 			var theme = getCurrentTheme(request, response);
-			var themes = themesManager.getThemes();
-			var themeFound = false;
-			themes.forEach(function(e) {
-				if (e.id === theme) {
-					themeFound = true;
-				}
-			})
-			theme = themeFound ? theme : DEFAULT_THEME;
 			response.print(theme);
 			response.setContentType('text/plain');
 		})
@@ -119,6 +111,14 @@ function getCurrentTheme(request, response) {
 
 	cookieValue = escape.escapeHtml4(cookieValue);
 	cookieValue = escape.escapeJavascript(cookieValue);
+	var themes = themesManager.getThemes();
+	var themeFound = false;
+	themes.forEach(function(e) {
+		if (e.id === cookieValue) {
+			themeFound = true;
+		}
+	})
+	cookieValue = themeFound ? cookieValue : DEFAULT_THEME;
 	return cookieValue;
 }
 
