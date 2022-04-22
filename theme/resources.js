@@ -29,8 +29,8 @@ rs.service()
 	.resource('')
 	.get(function (ctx, request, response) {
 		let theme = getCurrentTheme(request, response);
-		response.print(theme);
 		response.setContentType('text/plain');
+		response.print(theme);
 	})
 	.resource('themes')
 	.get(function (ctx, request, response) {
